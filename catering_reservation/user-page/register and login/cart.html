@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+            color: #333;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .cart-item h3 {
+            margin: 0;
+        }
+        .cart-item p {
+            margin: 0;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quantity-controls button {
+            background-color: #fa980e;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .quantity-controls button:hover {
+            background-color: #0c0801;
+        }
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .remove {
+            background-color: #f55f08;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .remove:hover {
+            background-color: #775607;
+        }
+        .proceed-btn {
+            display: block;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 5px;
+            margin: 20px auto 0;
+            text-decoration: none;
+            width: fit-content;
+        }
+        .proceed-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Cart</h1>
+    <div id="cartItems"></div>
+    <div class="total" id="totalPrice">Total: ₹0</div>
+    <button class="proceed-btn" onclick="proceedToOrder()">Proceed to Order</button>
+
+    <script>
+        // Load cart items from localStorage
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            const cartItemsDiv = document.getElementById("cartItems");
+            const totalPriceDiv = document.getElementById("totalPrice");
+
+            cartItemsDiv.innerHTML = ""; // Clear cart items display
+            let totalPrice = 0;
+
+            // Display each item in the cart
+            cart.forEach((item, index) => {
+                const cartItemDiv = document.createElement("div");
+                cartItemDiv.className = "cart-item";
+                cartItemDiv.innerHTML = `
+                    <h3>${item.name}</h3>
+                    <p>Price: ₹${item.price}</p>
+                    <div class="quantity-controls">
+                        <button onclick="changeQuantity(${index}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="changeQuantity(${index}, 1)">+</button>
+                    </div>
+                    <button class="remove" onclick="removeFromCart(${index})">Remove</button>
+                `;
+                cartItemsDiv.appendChild(cartItemDiv);
+
+                totalPrice += item.price * item.quantity; // Add item total to total price
+            });
+
+            // Display total price
+            totalPriceDiv.textContent = `Total: ₹${totalPrice}`;
+        }
+
+        // Change quantity of an item in the cart
+        function changeQuantity(index, change) {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart[index]) {
+                cart[index].quantity += change; // Increase or decrease quantity
+
+                // Remove item if quantity is 0 or less
+                if (cart[index].quantity <= 0) {
+                    cart.splice(index, 1);
+                }
+            }
+
+            localStorage.setItem("cart", JSON.stringify(cart)); // Save updated cart
+            loadCart(); // Reload the cart
+        }
+
+        // Remove an item from the cart
+        function removeFromCart(index) {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.splice(index, 1); // Remove the item at the specified index
+            localStorage.setItem("cart", JSON.stringify(cart)); // Save updated cart
+            loadCart(); // Reload the cart
+        }
+
+        // Proceed to Order
+        function proceedToOrder() {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) {
+                alert("Your cart is empty. Add items before proceeding.");
+                return;
+            }
+            // Redirect or proceed to an order confirmation page
+            alert("Proceeding to order. Redirecting...");
+            window.location.href = "order-summary.html";
+
+        }
+
+        // Load the cart on page load
+        loadCart();
+    </script>
+</body>
+</html>
+

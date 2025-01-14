@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+            color: #333;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            background-color: #fff;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .order-item h3 {
+            margin: 0;
+        }
+        .order-item p {
+            margin: 0;
+        }
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .back-btn {
+            display: inline-block;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .confirm-btn {
+            display:inline-block;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .back-btn {
+            background-color: #12ae18;
+        }
+        .back-btn:hover {
+            background-color: #0d6910;
+        }
+        .confirm-btn {
+            background-color: #28a745;
+        }
+        .confirm-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order Summary</h1>
+    <div id="orderItems"></div>
+    <div class="total" id="totalPrice">Total: ₹0</div>
+    <a href="cart.html" class="back-btn">Back to Cart</a>
+    <button class="confirm-btn" onclick="confirmOrder()">Confirm Order</button>
+
+    <script>
+        // Load order details from localStorage
+        function loadOrderSummary() {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            const orderItemsDiv = document.getElementById("orderItems");
+            const totalPriceDiv = document.getElementById("totalPrice");
+
+            orderItemsDiv.innerHTML = ""; // Clear previous order display
+            let totalPrice = 0;
+
+            // Display each item in the order
+            cart.forEach((item) => {
+                const orderItemDiv = document.createElement("div");
+                orderItemDiv.className = "order-item";
+                orderItemDiv.innerHTML = `
+                    <h3>${item.name}</h3>
+                    <p>Price: ₹${item.price}</p>
+                    <p>Quantity: ${item.quantity}</p>
+                    <p>Total: ₹${item.price * item.quantity}</p>
+                `;
+                orderItemsDiv.appendChild(orderItemDiv);
+
+                totalPrice += item.price * item.quantity; // Calculate total price
+            });
+
+            // Display the total price
+            totalPriceDiv.textContent = `Total: ₹${totalPrice}`;
+        }
+
+        // Confirm order and redirect
+        function confirmOrder() {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) {
+                alert("Your cart is empty. Add items before confirming.");
+                return;
+            }
+
+            // Simulate order confirmation process
+            alert("Order confirmed! Redirecting to confirmation page...");
+            
+            // Clear the cart after order confirmation
+            localStorage.removeItem("cart");
+
+            // Redirect to the order confirmation page
+            window.location.href = "order-confirmation.html";
+        }
+
+        // Load the order summary on page load
+        loadOrderSummary();
+    </script>
+</body>
+</html>
+

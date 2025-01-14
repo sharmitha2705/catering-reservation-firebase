@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK Food Order - View Products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Navigation Bar Styles */
+        .nav-bar {
+            background-color: #FF8C00;  /* Orange background */
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* Moving Welcome Message */
+        #userName {
+            font-weight: bold;
+            white-space: nowrap;
+            display: inline-block;
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .nav-bar ul {
+            list-style: none;
+            display: flex;
+        }
+        .nav-bar li {
+            margin: 0 15px;
+        }
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+        }
+        .nav-bar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            margin-top: 20px;
+            text-align: center;
+            background-color: #333;  /* Black background */
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .welcome-section img {
+            max-width: 50%;
+            height: auto;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-height: 300px;
+            object-fit: center;
+        }
+
+        /* Food Item Styles */
+        .food-item {
+            background-color: #fff;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .food-item button {
+            background-color: #FF8C00;  /* Orange button */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .food-item button:hover {
+            background-color: #E77F00;  /* Darker orange */
+        }
+
+        #orderSummary {
+            margin-top: 20px;
+        }
+
+        #logoutButton {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        #logoutButton:hover {
+            background-color: #f1a961;
+        }
+
+        /* Dropdown Menu */
+        #meal-options {
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            width: 200px;
+        }
+
+        #meal-options {
+            font-size: medium;
+            font-weight: 200;
+        }
+
+        #orderSummary img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 80%;  /* Adjust the width as needed */
+            height: auto;  /* Maintain aspect ratio */
+            border-radius: 5px; /* Optional: to round the corners */
+        }
+
+        /* Updated CSS for Food Images */
+        .food-item img.food-image {
+            width: 200%; /* Ensures the image adapts to its container */
+            max-width: 250px; /* Set a smaller maximum width */
+            height: auto; /* Maintain aspect ratio */
+            display: block;
+            margin: 0 auto 10px; /* Center the image and add spacing below */
+            border-radius: 8px; /* Slightly rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+    <span id="userName">Welcome to SK Food Order</span>
+    <ul>
+        <li><a href="cart.html" id="cart"><i class="fas fa-shopping-cart"></i> Cart-items</a></li>
+        <li><a href="#" id="profile"><i class="fas fa-user"></i> User Profile</a></li>
+        <li><a href="order-summary.html" id="order"><i class="fas fa-shopping-bag"></i> My Order</a></li>
+        <li><a href="#" id="logoutButton">Logout</a></li>
+    </ul>
+</div>
+
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h1>Welcome to SK Food Order</h1>
+        <p>Explore our delicious menu and place your order today!</p>
+    </div>
+
+    <!-- Meal Selection Dropdown -->
+    <div class="meal-selection">
+        <label for="meal-options"><strong>View Product:</strong></label>
+        <select id="meal-options" name="meal-options">
+            <option value="" disabled selected>Choose an option</option>
+            <option value="tiffin">Tiffin</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+        </select>
+    </div>
+
+    <!-- Display Food Items Based on Selection -->
+    <div id="foodItemsList"></div>
+
+    <!-- Order Summary -->
+    <div id="orderSummary">
+        <p><em>"At SK Food, we believe in serving not just food, but a delightful experience. Every meal is crafted with passion, using the finest ingredients to bring the authentic flavors of India right to your plate. Whether it's a quick tiffin or a hearty dinner, we strive to make every bite memorable."</em></p>
+        <img src="st.jpg" alt="Delicious Food">
+    </div>
+    <script>
+        // Example food items data with images
+        const foodData = {
+            tiffin: [
+                { 
+                    name: "Idli", 
+                    price: 30, // Ensure price is a number
+                    description: "Soft and fluffy rice cakes", 
+                    image: "idly.jpg"
+                },
+                { 
+                    name: "Dosa", 
+                    price: 50,
+                    description: "Crispy and savory pancakes", 
+                    image: "dosai.jpg"
+                }
+            ],
+            lunch: [
+                { 
+                    name: "Veg Thali", 
+                    price: 250, 
+                    description: "Assorted Indian vegetarian dishes", 
+                    image: "north indian-lunch-menu.jpg"
+                },
+                { 
+                    name: "South Meal", 
+                    price: 200, 
+                    description: "Rich and flavorful south dish", 
+                    image: "south-indian-full-meals.jpg"
+                }
+            ],
+            dinner: [
+                { 
+                    name: "Parotta", 
+                    price: 180, 
+                    description: "Flavourful yummy dish", 
+                    image: "parotta.jpg"
+                },
+                { 
+                    name: "Chappathi", 
+                    price: 40, 
+                    description: "Soft and fluffy Indian bread", 
+                    image: "chappathi.jpg"
+                }
+            ]
+        };
+    
+        // Function to display food items
+        function displayFoodItems(category) {
+            const foodItemsList = document.getElementById("foodItemsList");
+            foodItemsList.innerHTML = ""; // Clear previous items
+    
+            if (foodData[category]) {
+                foodData[category].forEach(item => {
+                    const foodItem = document.createElement("div");
+                    foodItem.className = "food-item";
+    
+                    foodItem.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}" class="food-image">
+                        <h3>${item.name}</h3>
+                        <p>${item.description}</p>
+                        <p><strong>Price:</strong> ₹${item.price}</p>
+                        <button onclick="addToCart('${item.name}', ${item.price}, '${item.image}')">Add to Cart</button>
+                    `;
+    
+                    foodItemsList.appendChild(foodItem);
+                });
+            } else {
+                foodItemsList.innerHTML = "<p>No items available for the selected category.</p>";
+            }
+        }
+    
+        // Add item to the cart
+        function addToCart(name, price, image) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ name, price, image });
+            localStorage.setItem("cart", JSON.stringify(cart));
+    
+            updateCartSummary(); // Update summary immediately
+            alert(`${name} added to cart!`);
+        }
+    
+        // Update Cart Summary
+        function updateCartSummary() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            let totalItems = cart.length;
+            let totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+    
+            document.getElementById("cart").textContent = `Cart-items (${totalItems}) - ₹${totalPrice}`;
+        }
+    
+        // Load summary on page load
+        window.onload = updateCartSummary;
+    
+        // Event listener for the dropdown
+        document.getElementById("cart").addEventListener("click", function (event) {
+        event.preventDefault();
+        window.location.href = "cart.html";
+    });
+
+    // Navigation for My Order
+    document.getElementById("order").addEventListener("click", function (event) {
+        event.preventDefault();
+        window.location.href = "order-summary.html";
+    });
+
+    // Logout button functionality
+    document.getElementById("logoutButton").addEventListener("click", function () {
+        alert("You have successfully logged out!");
+        window.location.href = "login.html"; // Redirect to login page
+    });
+
+    // Dropdown behavior
+    document.getElementById("meal-options").addEventListener("change", function () {
+        const selectedCategory = this.value;
+        displayFoodItems(selectedCategory);
+    });
+</script>   
+</body>
+</html>
+
+
